@@ -136,8 +136,9 @@ defmodule Bloomex do
   def capacity(%ScalableBloom{}), do: :infinity
 
   @doc """
-  todo: doc this
-  also, is it possible to implement `x in Bloomex.t`?
+  Returns `true` if the `e` exists in the bloom filter, otherwise returns `false`.
+
+  Keep in mind that you may get false positives, but never false negatives.
   """
   @spec member?(Bloomex.t, any) :: boolean
   def member?(%Bloom{mb: mb} = bloom, e) do
