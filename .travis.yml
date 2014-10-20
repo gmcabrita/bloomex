@@ -1,8 +1,8 @@
 language: erlang
 otp_release:
-          - 17.1
+        - 17.1
 before_install:
-          - git clone --branch=v1.0.1 git://github.com/elixir-lang/elixir.git
-              - cd elixir && make && cd ..
+        - git clone --branch=v1.0.1 git://github.com/elixir-lang/elixir.git
+        - cd elixir && make && cd ..
 before_script: "export PATH=`pwd`/elixir/bin:$PATH"
 script: "mix test"
