@@ -177,7 +177,7 @@ defmodule Bloomex do
     Enum.any?(b, &hash_member(hashes, &1))
   end
 
-  @spec make_hashes(pos_integer, any, Fun) :: pos_integer | {pos_integer, pos_integer}
+  @spec make_hashes(pos_integer, any, (term -> pos_integer)) :: pos_integer | {pos_integer, pos_integer}
   defp make_hashes(mb, e, hash_func) when mb <= 16 do
     hash_func.({e})
   end
