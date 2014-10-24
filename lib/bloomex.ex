@@ -16,7 +16,8 @@ defmodule Bloomex do
       :max,         # maximum number of elements
       :mb,          # 2^mb = m, the size of each slice (bitvector)
       :size,        # number of elements
-      :bv           # list of bitvectors
+      :bv,          # list of bitvectors
+      :hash_func    # hash function to use
     ]
 
     @type t ::
@@ -25,7 +26,8 @@ defmodule Bloomex do
       max: pos_integer,
       mb: pos_integer,
       size: pos_integer,
-      bv: [Bitarray.t]
+      bv: [Bitarray.t],
+      hash_func: Fun
     }
   end
 
@@ -38,7 +40,8 @@ defmodule Bloomex do
       :error_prob_ratio,  # error probability ratio
       :growth,            # log 2 of growth ratio
       :size,              # number of elements
-      :b                  # list of plain bloom filters
+      :b,                 # list of plain bloom filters
+      :hash_func          # hash function to use
     ]
 
     @type t ::
@@ -47,7 +50,8 @@ defmodule Bloomex do
       error_prob_ratio: float,
       growth: pos_integer,
       size: pos_integer,
-      b: [Bloom.t]
+      b: [Bloom.t],
+      hash_func: Fun
     }
   end
 
@@ -55,16 +59,19 @@ defmodule Bloomex do
   Returns a new plain bloom filter with:
     * capacity `n`
     * error probability `e`
+
+  The bloom filter will use the provided hash function `hash_func` which is
+  expected to be of type `hash_func(atom) :: pos_integer`.
   """
-  @spec new_plain_bloom(pos_integer, float) :: Bloom.t
-  def new_plain_bloom(n, e \\ 0.001) when is_number(e) and n > 0
+  @spec new_plain_bloom(pos_integer, float, Fun) :: Bloom.t
+  def new_plain_bloom(n, e \\ 0.001, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32))) when is_number(e) and n > 0
   and is_float(e) and e > 0 and e < 1 and n >= 4 / e do
-    bloom(:size, n, e)
+    bloom(:size, n, e, hash_func)
   end
 
 
-  @spec bloom(Atom, pos_integer, float) :: Bloom.t
-  defp bloom(mode, capacity, e) do
+  @spec bloom(Atom, pos_integer, float, Fun) :: Bloom.t
+  defp bloom(mode, capacity, e, hash_func) do
     k = 1 + trunc(log2(1 / e))
     p = :math.pow(e, 1 / k)
 
@@ -77,7 +84,11 @@ defmodule Bloomex do
     n = trunc(:math.log(1 - p) / :math.log(1 - 1 / m))
 
     %Bloom{error_prob: e, max: n, mb: mb, size: 0,
-      bv: (for _ <- 1..k, do: Bitarray.new(1 <<< mb))}
+      bv: (for _ <- 1..k, do: Bitarray.new(1 <<< mb)),
+      #hash_func: &(:erlang.phash2(&1, 1 <<< 32))
+      #hash_func: &(Murmur.hash(:x64_128, &1, 0))
+      hash_func: hash_func
+    }
   end
 
   @doc """
@@ -110,13 +121,20 @@ defmodule Bloomex do
     * error proability `e`
     * growth ratio `g`, `g` can be `1`, `2` or `3`
     * error probability ratio `r`
+
+  The bloom filter will use the provided hash function `hash_func` which is
+  expected to be of type `hash_func(atom) :: pos_integer`.
   """
-  @spec new(pos_integer, float, pos_integer, float) :: ScalableBloom.t
-  def new(n, e, g, r) when is_number(n) and n > 0 and is_float(e)
+  @spec new(pos_integer, float, pos_integer, float, Fun) :: ScalableBloom.t
+  def new(n, e, g, r, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32))) when is_number(n) and n > 0 and is_float(e)
   and e > 0 and e < 1 and is_integer(g) and g > 0 and g < 4 and is_float(r)
   and r > 0 and r < 1 and n >= 4 / (e * (1 - r)) do
     %ScalableBloom{error_prob: e, error_prob_ratio: r, growth: g, size: 0,
-      b: [new_plain_bloom(n, e * (1 - r))]}
+      b: [new_plain_bloom(n, e * (1 - r))],
+      #hash_func: &(:erlang.phash2(&1, 1 <<< 32))
+      #hash_func: &(Murmur.hash(:x64_128, &1, 0))
+      hash_func: hash_func
+    }
   end
 
   @doc """
@@ -141,13 +159,13 @@ defmodule Bloomex do
   Keep in mind that you may get false positives, but never false negatives.
   """
   @spec member?(Bloomex.t, any) :: boolean
-  def member?(%Bloom{mb: mb} = bloom, e) do
-    hashes = make_hashes(mb, e)
+  def member?(%Bloom{mb: mb, hash_func: hash_func} = bloom, e) do
+    hashes = make_hashes(mb, e, hash_func)
     hash_member(hashes, bloom)
   end
 
-  def member?(%ScalableBloom{b: [%Bloom{mb: mb} | _]} = bloom, e) do
-    hashes = make_hashes(mb, e)
+  def member?(%ScalableBloom{b: [%Bloom{mb: mb, hash_func: hash_func} | _]} = bloom, e) do
+    hashes = make_hashes(mb, e, hash_func)
     hash_member(hashes, bloom)
   end
 
@@ -163,13 +181,13 @@ defmodule Bloomex do
     Enum.any?(b, &hash_member(hashes, &1))
   end
 
-  @spec make_hashes(pos_integer, any) :: pos_integer | {pos_integer, pos_integer}
-  defp make_hashes(mb, e) when mb <= 16 do
-    :erlang.phash2({e}, 1 <<< 32)
+  @spec make_hashes(pos_integer, any, Fun) :: pos_integer | {pos_integer, pos_integer}
+  defp make_hashes(mb, e, hash_func) when mb <= 16 do
+    hash_func.({e})
   end
 
-  defp make_hashes(mb, e) when mb >= 32 do
-    {:erlang.phash2({e}, 1 <<< 32), :erlang.phash2([e], 1 <<< 32)}
+  defp make_hashes(mb, e, hash_func) when mb >= 32 do
+    {hash_func.({e}), hash_func.([e])}
   end
 
   @spec make_indexes(pos_integer, {pos_integer, pos_integer}) :: {pos_integer, pos_integer}
@@ -202,21 +220,21 @@ defmodule Bloomex do
   Returns a bloom filter with the element `e` added.
   """
   @spec add(Bloomex.t, any) :: Bloomex.t
-  def add(%Bloom{mb: mb} = bloom, e) do
-    hashes = make_hashes(mb, e)
+  def add(%Bloom{mb: mb, hash_func: hash_func} = bloom, e) do
+    hashes = make_hashes(mb, e, hash_func)
     hash_add(hashes, bloom)
   end
 
   def add(%ScalableBloom{error_prob_ratio: r, size: size, growth: g, b: [h | t] = bs} = bloom, e) do
-    %Bloom{mb: mb, error_prob: err, max: n, size: head_size} = h
-    hashes = make_hashes(mb, e)
+    %Bloom{mb: mb, error_prob: err, max: n, size: head_size, hash_func: hash_func} = h
+    hashes = make_hashes(mb, e, hash_func)
     case hash_member(hashes, bloom) do
       true  -> bloom
       false ->
         case head_size < n do
           true  -> %{bloom | size: size + 1, b: [hash_add(hashes, h) | t]}
           false ->
-            b = bloom(:bits, mb + g, err * r) |> add e
+            b = bloom(:bits, mb + g, err * r, hash_func) |> add e
             %{bloom | size: size + 1, b: [b | bs]}
         end
     end
