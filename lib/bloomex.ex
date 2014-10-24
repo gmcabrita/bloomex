@@ -27,7 +27,7 @@ defmodule Bloomex do
       mb: pos_integer,
       size: pos_integer,
       bv: [Bitarray.t],
-      hash_func: Fun
+      hash_func: (term -> pos_integer)
     }
   end
 
@@ -51,27 +51,70 @@ defmodule Bloomex do
       growth: pos_integer,
       size: pos_integer,
       b: [Bloom.t],
-      hash_func: Fun
+      hash_func: (term -> pos_integer)
     }
   end
 
   @doc """
-  Returns a new plain bloom filter with:
-    * capacity `n`
-    * error probability `e`
+  Returns a scalable Bloom filter based on the provided arguments:
+    `capacity`, the initial capacity before expanding
+    `error`, the error probability
+    `error_ratio`, the error probability ratio
+    `growth`, the growth ratio when full
+    `hash_func`, a hashing function
 
-  The bloom filter will use the provided hash function `hash_func` which is
-  expected to be of type `hash_func(atom) :: pos_integer`.
+  If a hash function is not provided then `:erlang.phash2/2` will be used with
+  the maximum range possible (2^32).
+
+  Restrictions:
+    `capacity` must be a positive integer
+    `error` must be a float between `0` and `1`
+    `error_ratio` must be a float between `0` and `1`
+    `growth` must be a positive integer between `1` and `3`
+    `hash_func` must be a function of type `term -> pos_integer`
+
+  The function follows a rule of thumb due to double hashing where
+  `capacity >= 4 / (error * (1 - error_ratio))`
   """
-  @spec new_plain_bloom(pos_integer, float, Fun) :: Bloom.t
-  def new_plain_bloom(n, e \\ 0.001, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32))) when is_number(e) and n > 0
-  and is_float(e) and e > 0 and e < 1 and n >= 4 / e do
-    bloom(:size, n, e, hash_func)
+  @spec scalable(pos_integer, float, float, pos_integer, (term -> pos_integer)) :: ScalableBloom.t
+  def scalable(capacity, error, error_ratio, growth, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32)))
+  when is_number(capacity) and capacity > 0 and is_float(error) and error > 0
+  and error < 1 and is_integer(growth) and growth > 0 and growth < 4
+  and is_float(error_ratio) and error_ratio > 0 and error_ratio < 1
+  and capacity >= 4 / (error * (1 - error_ratio)) do
+    %ScalableBloom{
+      error_prob: error, error_prob_ratio: error_ratio, growth: growth, size: 0,
+      b: [plain(capacity, error * (1 - error_ratio), hash_func)],
+      hash_func: hash_func
+    }
   end
 
+  @doc """
+  Returns a plain Bloom filter based on the provided arguments:
+    `capacity`, used to calculate the size of each bitvector slice
+    `error`, the error probability
+    `hash_func`, a hashing function
 
-  @spec bloom(Atom, pos_integer, float, Fun) :: Bloom.t
-  defp bloom(mode, capacity, e, hash_func) do
+  If a hash function is not provided then `:erlang.phash2/2` will be used with
+  the maximum range possible `(2^32)`.
+
+  Restrictions:
+    `capacity` must be a positive integer
+    `error` must be a float between `0` and `1`
+    `hash_func` must be a function of type `term -> pos_integer`
+
+  The function follows a rule of thumb due to double hashing where
+  `capacity >= 4 / error` must hold true.
+  """
+  @spec plain(pos_integer, float, (term -> pos_integer)) :: Bloom.t
+  def plain(capacity, error, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32)))
+  when is_number(error) and capacity > 0 and is_float(error) and error > 0
+  and error < 1 and capacity >= 4 / error do
+    plain(:size, capacity, error, hash_func)
+  end
+
+  @spec plain(atom, pos_integer, float, (term -> pos_integer)) :: Bloom.t
+  defp plain(mode, capacity, e, hash_func) do
     k = 1 + trunc(log2(1 / e))
     p = :math.pow(e, 1 / k)
 
@@ -83,53 +126,9 @@ defmodule Bloomex do
     m = 1 <<< mb
     n = trunc(:math.log(1 - p) / :math.log(1 - 1 / m))
 
-    %Bloom{error_prob: e, max: n, mb: mb, size: 0,
-      bv: (for _ <- 1..k, do: Bitarray.new(1 <<< mb)),
-      hash_func: hash_func
-    }
-  end
-
-  @doc """
-  Returns a new scalable bloom filter with:
-    * initial capacity `n`
-    * error probability `e`
-    * growth ratio `1`
-
-  When using this function the error probability ratio is provided for you.
-  """
-  @spec new(pos_integer, float) :: ScalableBloom.t
-  def new(n, e \\ 0.001), do: new(n, e, 1)
-
-  @doc """
-  Returns a new scalable bloom filter with:
-    * initial capacity `n`
-    * error probability `e`
-    * the specified growth ratio, which can be `1`, `2` or `3`
-
-  When using this function the error probability ratio is provided for you.
-  """
-  @spec new(pos_integer, float, pos_integer) :: ScalableBloom.t
-  def new(n, e, 1), do: new(n, e, 1, 0.85)
-  def new(n, e, 2), do: new(n, e, 2, 0.75)
-  def new(n, e, 3), do: new(n, e, 3, 0.65)
-
-  @doc """
-  Returns a new scalable bloom filter with:
-    * initial capacity `n`
-    * error proability `e`
-    * growth ratio `g`, `g` can be `1`, `2` or `3`
-    * error probability ratio `r`
-
-  The bloom filter will use the provided hash function `hash_func` which is
-  expected to be of type `hash_func(atom) :: pos_integer`.
-  """
-  @spec new(pos_integer, float, pos_integer, float, Fun) :: ScalableBloom.t
-  def new(n, e, g, r, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32))) when is_number(n) and n > 0 and is_float(e)
-  and e > 0 and e < 1 and is_integer(g) and g > 0 and g < 4 and is_float(r)
-  and r > 0 and r < 1 and n >= 4 / (e * (1 - r)) do
-    %ScalableBloom{error_prob: e, error_prob_ratio: r, growth: g, size: 0,
-      b: [new_plain_bloom(n, e * (1 - r))],
-      hash_func: hash_func
+    %Bloom{
+      error_prob: e, max: n, mb: mb, size: 0,
+      bv: (for _ <- 1..k, do: Bitarray.new(1 <<< mb)), hash_func: hash_func
     }
   end
 
@@ -230,7 +229,7 @@ defmodule Bloomex do
         case head_size < n do
           true  -> %{bloom | size: size + 1, b: [hash_add(hashes, h) | t]}
           false ->
-            b = bloom(:bits, mb + g, err * r, hash_func) |> add e
+            b = plain(:bits, mb + g, err * r, hash_func) |> add e
             %{bloom | size: size + 1, b: [b | bs]}
         end
     end
