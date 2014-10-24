@@ -85,8 +85,6 @@ defmodule Bloomex do
 
     %Bloom{error_prob: e, max: n, mb: mb, size: 0,
       bv: (for _ <- 1..k, do: Bitarray.new(1 <<< mb)),
-      #hash_func: &(:erlang.phash2(&1, 1 <<< 32))
-      #hash_func: &(Murmur.hash(:x64_128, &1, 0))
       hash_func: hash_func
     }
   end
@@ -131,8 +129,6 @@ defmodule Bloomex do
   and r > 0 and r < 1 and n >= 4 / (e * (1 - r)) do
     %ScalableBloom{error_prob: e, error_prob_ratio: r, growth: g, size: 0,
       b: [new_plain_bloom(n, e * (1 - r))],
-      #hash_func: &(:erlang.phash2(&1, 1 <<< 32))
-      #hash_func: &(Murmur.hash(:x64_128, &1, 0))
       hash_func: hash_func
     }
   end
