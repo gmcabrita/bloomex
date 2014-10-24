@@ -27,7 +27,7 @@ defmodule Bloomex.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:murmur, "~> 0.1", only: :dev},
+      {:murmur, "~> 0.1", only: :test},
       {:excoveralls, "~> 0.3", only: :dev}
     ]
   end
