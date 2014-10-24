@@ -57,21 +57,21 @@ defmodule Bloomex do
 
   @doc """
   Returns a scalable Bloom filter based on the provided arguments:
-    `capacity`, the initial capacity before expanding
-    `error`, the error probability
-    `error_ratio`, the error probability ratio
-    `growth`, the growth ratio when full
-    `hash_func`, a hashing function
+  * `capacity`, the initial capacity before expanding
+  * `error`, the error probability
+  * `error_ratio`, the error probability ratio
+  * `growth`, the growth ratio when full
+  * `hash_func`, a hashing function
 
   If a hash function is not provided then `:erlang.phash2/2` will be used with
-  the maximum range possible (2^32).
+  the maximum range possible `(2^32)`.
 
   Restrictions:
-    `capacity` must be a positive integer
-    `error` must be a float between `0` and `1`
-    `error_ratio` must be a float between `0` and `1`
-    `growth` must be a positive integer between `1` and `3`
-    `hash_func` must be a function of type `term -> pos_integer`
+  * `capacity` must be a positive integer
+  * `error` must be a float between `0` and `1`
+  * `error_ratio` must be a float between `0` and `1`
+  * `growth` must be a positive integer between `1` and `3`
+  * `hash_func` must be a function of type `term -> pos_integer`
 
   The function follows a rule of thumb due to double hashing where
   `capacity >= 4 / (error * (1 - error_ratio))`
@@ -91,17 +91,17 @@ defmodule Bloomex do
 
   @doc """
   Returns a plain Bloom filter based on the provided arguments:
-    `capacity`, used to calculate the size of each bitvector slice
-    `error`, the error probability
-    `hash_func`, a hashing function
+  * `capacity`, used to calculate the size of each bitvector slice
+  * `error`, the error probability
+  * `hash_func`, a hashing function
 
   If a hash function is not provided then `:erlang.phash2/2` will be used with
   the maximum range possible `(2^32)`.
 
   Restrictions:
-    `capacity` must be a positive integer
-    `error` must be a float between `0` and `1`
-    `hash_func` must be a function of type `term -> pos_integer`
+  * `capacity` must be a positive integer
+  * `error` must be a float between `0` and `1`
+  * `hash_func` must be a function of type `term -> pos_integer`
 
   The function follows a rule of thumb due to double hashing where
   `capacity >= 4 / error` must hold true.
@@ -141,6 +141,7 @@ defmodule Bloomex do
 
   @doc """
   Returns the capacity of the bloom filter.
+
   A plain bloom filter will always have a fixed capacity, while a scalable one
   will always have a theoretically infite capacity.
   """
@@ -149,7 +150,7 @@ defmodule Bloomex do
   def capacity(%ScalableBloom{}), do: :infinity
 
   @doc """
-  Returns `true` if the `e` exists in the bloom filter, otherwise returns `false`.
+  Returns `true` if the element `e` exists in the bloom filter, otherwise returns `false`.
 
   Keep in mind that you may get false positives, but never false negatives.
   """
