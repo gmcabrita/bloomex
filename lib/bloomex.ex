@@ -166,7 +166,7 @@ defmodule Bloomex do
 
   @spec hash_member(pos_integer, Bloomex.t) :: boolean
   defp hash_member(hashes, %Bloom{mb: mb, bv: bv}) do
-    mask = 1 <<< mb - 1
+    mask = (1 <<< mb) - 1
     {i1, i0} = make_indexes(mask, hashes)
 
     all_set(mask, i1, i0, bv)
@@ -181,7 +181,7 @@ defmodule Bloomex do
     hash_func.({e})
   end
 
-  defp make_hashes(mb, e, hash_func) when mb >= 32 do
+  defp make_hashes(mb, e, hash_func) when mb <= 32 do
     {hash_func.({e}), hash_func.([e])}
   end
 
@@ -237,7 +237,7 @@ defmodule Bloomex do
 
   @spec hash_add(pos_integer, Bloom.t) :: Bloom.t
   defp hash_add(hashes, %Bloom{mb: mb, bv: bv, size: size} = b) do
-    mask = 1 <<< mb - 1
+    mask = (1 <<< mb) - 1
     {i1, i0} = make_indexes(mask, hashes)
 
     case all_set(mask, i1, i0, bv) do
