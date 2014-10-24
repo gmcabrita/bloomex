@@ -5,7 +5,8 @@ defmodule Bloomex.Mixfile do
     [app: :bloomex,
      version: "0.0.1",
      elixir: "~> 1.0",
-     deps: deps]
+     deps: deps,
+     test_coverage: [tool: ExCoveralls]]
   end
 
   # Configuration for the OTP application
@@ -25,6 +26,9 @@ defmodule Bloomex.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [
+      {:murmur, "~> 0.1", only: :dev},
+      {:excoveralls, "~> 0.3", only: :dev}
+    ]
   end
 end
