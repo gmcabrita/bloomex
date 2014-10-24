@@ -1,34 +1,37 @@
 defmodule Bloomex.Mixfile do
   use Mix.Project
 
+  @description """
+  Bloomex is a pure Elixir implementation of Scalable Bloom Filters.
+  """
+
   def project do
     [app: :bloomex,
-     version: "0.0.1",
+     version: "0.1.0",
      elixir: "~> 1.0",
+     description: @description,
+     package: package,
      deps: deps,
      test_coverage: [tool: ExCoveralls]]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: []]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type `mix help deps` for more examples and options
   defp deps do
     [
       {:murmur, "~> 0.1", only: [:test, :dev]},
       {:excoveralls, "~> 0.3", only: :dev}
+    ]
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      contributors: ["Gonçalo Cabrita"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/gmcabrita/bloomex"}
     ]
   end
 end
