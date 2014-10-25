@@ -74,7 +74,7 @@ defmodule Bloomex do
   * `hash_func` must be a function of type `term -> pos_integer`
 
   The function follows a rule of thumb due to double hashing where
-  `capacity >= 4 / (error * (1 - error_ratio))`
+  `capacity >= 4 / (error * (1 - error_ratio))` must hold true.
   """
   @spec scalable(pos_integer, float, float, pos_integer, (term -> pos_integer)) :: ScalableBloom.t
   def scalable(capacity, error, error_ratio, growth, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32)))
