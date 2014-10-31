@@ -1,4 +1,4 @@
-Bloomex [![Build Status](https://travis-ci.org/gmcabrita/bloomex.png?branch=master)](https://travis-ci.org/gmcabrita/bloomex) [![Coverage Status](https://img.shields.io/coveralls/gmcabrita/bloomex.svg)](https://coveralls.io/r/gmcabrita/bloomex?branch=master) [![Hex Version](http://img.shields.io/hexpm/v/bloomex.svg)](https://hex.pm/packages/bloomex)
+Bloomex [![Build Status](https://img.shields.io/travis/gmcabrita/bloomex.svg?style=flat)](https://travis-ci.org/gmcabrita/bloomex) [![Coverage Status](https://img.shields.io/coveralls/gmcabrita/bloomex.svg?style=flat)](https://coveralls.io/r/gmcabrita/bloomex?branch=master) [![License](http://img.shields.io/hexpm/l/bloomex.svg?style=flat)](https://github.com/gmcabrita/bloomex/blob/master/LICENSE) [![Hex Version](http://img.shields.io/hexpm/v/bloomex.svg?style=flat)](https://hex.pm/packages/bloomex)
 =======
 
 Bloomex is a pure Elixir implementation of [Scalable Bloom Filters](http://asc.di.fct.unl.pt/~nmp/pubs/ref--04.pdf).
