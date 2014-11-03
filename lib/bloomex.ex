@@ -10,14 +10,21 @@ defmodule Bloomex do
   defmodule Bloom do
     @moduledoc """
     A plain bloom filter.
+
+    * :error_prob - error probability
+    * :max - maximum number of elements
+    * :mb - 2^mb = m, the size of each slice (bitvector)
+    * :size - number of elements
+    * :bv - list of bitvectors
+    * :hash_func - hash function to use
     """
     defstruct [
-      :error_prob,  # error probability
-      :max,         # maximum number of elements
-      :mb,          # 2^mb = m, the size of each slice (bitvector)
-      :size,        # number of elements
-      :bv,          # list of bitvectors
-      :hash_func    # hash function to use
+      :error_prob,
+      :max,
+      :mb,
+      :size,
+      :bv,
+      :hash_func
     ]
 
     @type t ::
@@ -34,14 +41,21 @@ defmodule Bloomex do
   defmodule ScalableBloom do
     @moduledoc """
     A scalable bloom filter.
+
+    * :error_prob - error probability
+    * :error_prob_ratio - error probability ratio
+    * :growth - log 2 of growth ratio
+    * :size - number of elements
+    * :b - list of plain bloom filters
+    * :hash_func - hash function to use
     """
     defstruct [
-      :error_prob,        # error probability
-      :error_prob_ratio,  # error probability ratio
-      :growth,            # log 2 of growth ratio
-      :size,              # number of elements
-      :b,                 # list of plain bloom filters
-      :hash_func          # hash function to use
+      :error_prob,
+      :error_prob_ratio,
+      :growth,
+      :size,
+      :b,
+      :hash_func
     ]
 
     @type t ::
