@@ -9,7 +9,7 @@ Add Bloomex as a dependency in your mix.exs file.
 
 ```elixir
 def deps do
-  [{:bloomex, "~> 0.1"}]
+  [{:bloomex, "~> 0.2"}]
 end
 ```
 

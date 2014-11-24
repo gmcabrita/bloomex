@@ -7,7 +7,7 @@ defmodule Bloomex.Mixfile do
 
   def project do
     [app: :bloomex,
-     version: "0.1.0",
+     version: "0.2.0",
      elixir: "~> 1.0",
      description: @description,
      package: package,
@@ -21,7 +21,6 @@ defmodule Bloomex.Mixfile do
 
   defp deps do
     [
-      {:murmur, "~> 0.1", only: [:test, :dev]},
       {:excoveralls, "~> 0.3", only: :dev}
     ]
   end
