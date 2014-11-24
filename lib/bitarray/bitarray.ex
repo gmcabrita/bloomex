@@ -1,4 +1,4 @@
-defmodule Bitarray do
+defmodule Bloomex.Bitarray do
   @moduledoc """
   This module implements a bit array using Erlang's `:array` module.
   """
@@ -12,7 +12,7 @@ defmodule Bitarray do
   @doc """
   Returns a new bitarray of size `n`.
   """
-  @spec new(integer) :: Bitarray.t
+  @spec new(pos_integer) :: t
   def new(n) do
     div(n - 1, @w) + 1 |> :array.new {:default, 0}
   end
@@ -20,7 +20,7 @@ defmodule Bitarray do
   @doc """
   Returns an updated bitarray where the `i`th bit is set.
   """
-  @spec set(Bitarray.t, integer) :: Bitarray.t
+  @spec set(t, non_neg_integer) :: t
   def set(a, i) do
     ai = div i, @w
     v = :array.get ai, a
@@ -32,7 +32,7 @@ defmodule Bitarray do
   Returns `true` if the bitarray has the `i`th bit set,
   otherwise returns `false`.
   """
-  @spec get(Bitarray.t, integer) :: boolean
+  @spec get(t, non_neg_integer) :: boolean
   def get(a, i) do
     ai = div i, @w
     v = :array.get ai, a

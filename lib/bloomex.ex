@@ -3,7 +3,7 @@ defmodule Bloomex do
   This module implements a Scalable Bloom Filter.
   """
 
-  @type t :: Bloom.t | ScalableBloom.t
+  @type t :: Bloomex.Bloom.t | Bloomex.ScalableBloom.t
 
   use Bitwise
 
@@ -19,23 +19,23 @@ defmodule Bloomex do
     * :hash_func - hash function to use
     """
     defstruct [
-      :error_prob,
-      :max,
-      :mb,
-      :size,
-      :bv,
-      :hash_func
-    ]
+            :error_prob,
+            :max,
+            :mb,
+            :size,
+            :bv,
+            :hash_func
+        ]
 
     @type t ::
     %Bloom{
-      error_prob: float,
-      max: pos_integer,
-      mb: pos_integer,
-      size: pos_integer,
-      bv: [Bitarray.t],
-      hash_func: (term -> pos_integer)
-    }
+            error_prob: float,
+            max: pos_integer,
+            mb: pos_integer,
+            size: pos_integer,
+            bv: [Bloomex.Bitarray.t],
+            hash_func: (term -> pos_integer)
+        }
   end
 
   defmodule ScalableBloom do
@@ -50,23 +50,23 @@ defmodule Bloomex do
     * :hash_func - hash function to use
     """
     defstruct [
-      :error_prob,
-      :error_prob_ratio,
-      :growth,
-      :size,
-      :b,
-      :hash_func
-    ]
+            :error_prob,
+            :error_prob_ratio,
+            :growth,
+            :size,
+            :b,
+            :hash_func
+        ]
 
     @type t ::
     %ScalableBloom{
-      error_prob: float,
-      error_prob_ratio: float,
-      growth: pos_integer,
-      size: pos_integer,
-      b: [Bloom.t],
-      hash_func: (term -> pos_integer)
-    }
+            error_prob: float,
+            error_prob_ratio: float,
+            growth: pos_integer,
+            size: pos_integer,
+            b: [Bloom.t],
+            hash_func: (term -> pos_integer)
+        }
   end
 
   @doc """
@@ -90,18 +90,19 @@ defmodule Bloomex do
   The function follows a rule of thumb due to double hashing where
   `capacity >= 4 / (error * (1 - error_ratio))` must hold true.
   """
-  @spec scalable(pos_integer, float, float, pos_integer, (term -> pos_integer)) :: ScalableBloom.t
+  @spec scalable(pos_integer, float, float, 1 | 2 | 3, (term -> pos_integer)) :: ScalableBloom.t
   def scalable(capacity, error, error_ratio, growth, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32)))
   when is_number(capacity) and capacity > 0 and is_float(error) and error > 0
   and error < 1 and is_integer(growth) and growth > 0 and growth < 4
   and is_float(error_ratio) and error_ratio > 0 and error_ratio < 1
   and capacity >= 4 / (error * (1 - error_ratio)) do
     %ScalableBloom{
-      error_prob: error, error_prob_ratio: error_ratio, growth: growth, size: 0,
-      b: [plain(capacity, error * (1 - error_ratio), hash_func)],
-      hash_func: hash_func
-    }
+            error_prob: error, error_prob_ratio: error_ratio, growth: growth, size: 0,
+            b: [plain(capacity, error * (1 - error_ratio), hash_func)],
+            hash_func: hash_func
+        }
   end
+
 
   @doc """
   Returns a plain Bloom filter based on the provided arguments:
@@ -141,15 +142,15 @@ defmodule Bloomex do
     n = trunc(:math.log(1 - p) / :math.log(1 - 1 / m))
 
     %Bloom{
-      error_prob: e, max: n, mb: mb, size: 0,
-      bv: (for _ <- 1..k, do: Bitarray.new(1 <<< mb)), hash_func: hash_func
-    }
+            error_prob: e, max: n, mb: mb, size: 0,
+            bv: (for _ <- 1..k, do: Bloomex.Bitarray.new(1 <<< mb)), hash_func: hash_func
+        }
   end
 
   @doc """
   Returns the number of elements currently in the bloom filter.
   """
-  @spec size(Bloomex.t) :: pos_integer
+  @spec size(t) :: pos_integer
   def size(%Bloom{size: size}), do: size
   def size(%ScalableBloom{size: size}), do: size
 
@@ -217,10 +218,10 @@ defmodule Bloomex do
   @spec masked_pair(pos_integer, pos_integer, pos_integer) :: {pos_integer, pos_integer}
   defp masked_pair(mask, x, y), do: {x &&& mask, y &&& mask}
 
-  @spec all_set(pos_integer, pos_integer, pos_integer, [Bloom.t]) :: boolean
+  @spec all_set(pos_integer, pos_integer, pos_integer, [Bloomex.Bitarray.t]) :: boolean
   defp all_set(_, _, _, []), do: true
   defp all_set(mask, i1, i, [h | t]) do
-    case Bitarray.get(h, i) do
+    case Bloomex.Bitarray.get(h, i) do
       true  -> all_set(mask, i1, (i + i1) &&& mask, t)
       false -> false
     end
@@ -241,12 +242,12 @@ defmodule Bloomex do
     case hash_member(hashes, bloom) do
       true  -> bloom
       false ->
-        case head_size < n do
-          true  -> %{bloom | size: size + 1, b: [hash_add(hashes, h) | t]}
-          false ->
-            b = plain(:bits, mb + g, err * r, hash_func) |> add e
-            %{bloom | size: size + 1, b: [b | bs]}
-        end
+          case head_size < n do
+            true  -> %{bloom | size: size + 1, b: [hash_add(hashes, h) | t]}
+            false ->
+                b = plain(:bits, mb + g, err * r, hash_func) |> add e
+                %{bloom | size: size + 1, b: [b | bs]}
+          end
     end
   end
 
@@ -261,13 +262,13 @@ defmodule Bloomex do
     end
   end
 
-  @spec set_bits(pos_integer, pos_integer, pos_integer, [Bitarray.t], [Bitarray.t]) :: [Bitarray.t]
+  @spec set_bits(pos_integer, pos_integer, pos_integer, [Bloomex.Bitarray.t], [Bloomex.Bitarray.t]) :: [Bloomex.Bitarray.t]
   defp set_bits(_, _, _, [], acc), do: Enum.reverse acc
   defp set_bits(mask, i1, i, [h | t], acc) do
-    set_bits(mask, i1, (i + i1) &&& mask, t, [Bitarray.set(h, i) | acc])
+    set_bits(mask, i1, (i + i1) &&& mask, t, [Bloomex.Bitarray.set(h, i) | acc])
   end
 
-  @spec log2(number) :: number
+  @spec log2(float) :: float
   defp log2(x) do
     :math.log(x) / :math.log(2)
   end
