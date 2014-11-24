@@ -33,7 +33,7 @@ defmodule Bloomex do
             max: pos_integer,
             mb: pos_integer,
             size: pos_integer,
-            bv: [Bloomex.Bitarray.t],
+            bv: [Bloomex.BitArray.t],
             hash_func: (term -> pos_integer)
         }
   end
@@ -143,7 +143,7 @@ defmodule Bloomex do
 
     %Bloom{
             error_prob: e, max: n, mb: mb, size: 0,
-            bv: (for _ <- 1..k, do: Bloomex.Bitarray.new(1 <<< mb)), hash_func: hash_func
+            bv: (for _ <- 1..k, do: Bloomex.BitArray.new(1 <<< mb)), hash_func: hash_func
         }
   end
 
@@ -218,10 +218,10 @@ defmodule Bloomex do
   @spec masked_pair(pos_integer, pos_integer, pos_integer) :: {pos_integer, pos_integer}
   defp masked_pair(mask, x, y), do: {x &&& mask, y &&& mask}
 
-  @spec all_set(pos_integer, pos_integer, pos_integer, [Bloomex.Bitarray.t]) :: boolean
+  @spec all_set(pos_integer, pos_integer, pos_integer, [Bloomex.BitArray.t]) :: boolean
   defp all_set(_, _, _, []), do: true
   defp all_set(mask, i1, i, [h | t]) do
-    case Bloomex.Bitarray.get(h, i) do
+    case Bloomex.BitArray.get(h, i) do
       true  -> all_set(mask, i1, (i + i1) &&& mask, t)
       false -> false
     end
@@ -262,10 +262,10 @@ defmodule Bloomex do
     end
   end
 
-  @spec set_bits(pos_integer, pos_integer, pos_integer, [Bloomex.Bitarray.t], [Bloomex.Bitarray.t]) :: [Bloomex.Bitarray.t]
+  @spec set_bits(pos_integer, pos_integer, pos_integer, [Bloomex.BitArray.t], [Bloomex.BitArray.t]) :: [Bloomex.BitArray.t]
   defp set_bits(_, _, _, [], acc), do: Enum.reverse acc
   defp set_bits(mask, i1, i, [h | t], acc) do
-    set_bits(mask, i1, (i + i1) &&& mask, t, [Bloomex.Bitarray.set(h, i) | acc])
+    set_bits(mask, i1, (i + i1) &&& mask, t, [Bloomex.BitArray.set(h, i) | acc])
   end
 
   @spec log2(float) :: float

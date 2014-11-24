@@ -1,4 +1,4 @@
-defmodule Bloomex.Bitarray do
+defmodule Bloomex.BitArray do
   @moduledoc """
   This module implements a bit array using Erlang's `:array` module.
   """
