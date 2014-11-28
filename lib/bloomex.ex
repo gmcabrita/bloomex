@@ -4,26 +4,26 @@ defmodule Bloomex do
 
   ## Examples
 
-    iex> bf = Bloomex.scalable(1000, 0.1, 0.1, 2)
-    %Bloomex.ScalableBloom...
+      iex> bf = Bloomex.scalable(1000, 0.1, 0.1, 2)
+      %Bloomex.ScalableBloom...
 
-    iex> bf = Bloomex.add(bf, 5)
-    %Bloomex.ScalableBloom...
+      iex> bf = Bloomex.add(bf, 5)
+      %Bloomex.ScalableBloom...
 
-    iex> Bloomex.member?(bf, 5)
-    true
+      iex> Bloomex.member?(bf, 5)
+      true
 
-    iex> bf = Bloomex.add(bf, 100)
-    %Bloomex.ScalableBloom...
+      iex> bf = Bloomex.add(bf, 100)
+      %Bloomex.ScalableBloom...
 
-    iex> Bloomex.member?(bf, 100)
-    true
+      iex> Bloomex.member?(bf, 100)
+      true
 
-    iex> Bloomex.member?(bf, 105)
-    false
+      iex> Bloomex.member?(bf, 105)
+      false
 
-    iex> Bloomex.member?(bf, 101) # false positive
-    true
+      iex> Bloomex.member?(bf, 101) # false positive
+      true
 
   """
 
