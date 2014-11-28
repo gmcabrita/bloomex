@@ -1,6 +1,6 @@
 defmodule Bloomex do
   @moduledoc """
-  This module implements a Scalable Bloom Filter.
+  This module implements a [Scalable Bloom Filter](http://asc.di.fct.unl.pt/~nmp/pubs/ref--04.pdf).
 
   ## Examples
 
