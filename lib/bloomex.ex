@@ -115,7 +115,7 @@ defmodule Bloomex do
   `capacity >= 4 / (error * (1 - error_ratio))` must hold true.
   """
   @spec scalable(pos_integer, float, float, 1 | 2 | 3, (term -> pos_integer)) :: ScalableBloom.t
-  def scalable(capacity, error, error_ratio, growth, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32)))
+  def scalable(capacity, error, error_ratio, growth, hash_func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end)
   when is_number(capacity) and capacity > 0 and is_float(error) and error > 0
   and error < 1 and is_integer(growth) and growth > 0 and growth < 4
   and is_float(error_ratio) and error_ratio > 0 and error_ratio < 1
@@ -146,7 +146,7 @@ defmodule Bloomex do
   `capacity >= 4 / error` must hold true.
   """
   @spec plain(pos_integer, float, (term -> pos_integer)) :: Bloom.t
-  def plain(capacity, error, hash_func \\ &(:erlang.phash2(&1, 1 <<< 32)))
+  def plain(capacity, error, hash_func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end)
   when is_number(error) and capacity > 0 and is_float(error) and error > 0
   and error < 1 and capacity >= 4 / error do
     plain(:size, capacity, error, hash_func)
