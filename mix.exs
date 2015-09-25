@@ -7,7 +7,7 @@ defmodule Bloomex.Mixfile do
 
   def project do
     [app: :bloomex,
-     version: "0.2.1",
+     version: "0.2.2",
      elixir: "~> 1.0",
      description: @description,
      package: package,
