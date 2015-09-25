@@ -29,7 +29,7 @@ defmodule Bloomex.Mixfile do
 
   defp package do
     [files: ["lib", "mix.exs", "README.md", "LICENSE"],
-     contributors: ["Gonçalo Cabrita"],
+     maintainers: ["Gonçalo Cabrita"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/gmcabrita/bloomex"}
     ]
