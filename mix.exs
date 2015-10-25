@@ -12,7 +12,13 @@ defmodule Bloomex.Mixfile do
      description: @description,
      package: package,
      deps: deps,
-     aliases: [dialyze: "dialyze --unmatched-returns --error-handling --race-conditions --underspecs"],
+     aliases: [
+        dialyze: "dialyze \
+                    --unmatched-returns \
+                    --error-handling \
+                    --race-conditions \
+                    --underspecs"
+      ],
      test_coverage: [tool: ExCoveralls]]
   end
 
@@ -21,9 +27,9 @@ defmodule Bloomex.Mixfile do
   end
 
   defp deps do
-    [{:excoveralls, "~> 0.3", only: :dev},
-     {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.10", only: :dev},
+    [{:excoveralls, "~> 0.3", only: :docs},
+     {:earmark, "~> 0.1", only: :docs},
+     {:ex_doc, "~> 0.10", only: :docs},
      {:inch_ex, only: :docs}
     ]
   end
