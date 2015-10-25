@@ -27,16 +27,22 @@ When you are done, run `mix deps.get` in your shell to fetch and compile Bloomex
 ```iex
 iex> bf = Bloomex.scalable(1000, 0.1, 0.1, 2)
 %Bloomex.ScalableBloom...
+
 iex> bf = Bloomex.add(bf, 5)
 %Bloomex.ScalableBloom...
+
 iex> Bloomex.member?(bf, 5)
 true
+
 iex> bf = Bloomex.add(bf, 100)
 %Bloomex.ScalableBloom...
+
 iex> Bloomex.member?(bf, 100)
 true
+
 iex> Bloomex.member?(bf, 105)
 false
+
 iex> Bloomex.member?(bf, 101) # false positive
 true
 ```
@@ -48,16 +54,22 @@ You can also pass in a hashing function to be used by the Bloom filter when crea
 ```iex
 iex> bf = Bloomex.scalable(1000, 0.1, 0.1, 2, &(Murmur.hash_x86_128(&1)))
 %Bloomex.ScalableBloom...
+
 iex> bf = Bloomex.add(bf, 5)
 %Bloomex.ScalableBloom...
+
 iex> Bloomex.member?(bf, 5)
 true
+
 iex> bf = Bloomex.add(bf, 100)
 %Bloomex.ScalableBloom...
+
 iex> Bloomex.member?(bf, 100)
 true
+
 iex> Bloomex.member?(bf, 105) # false positive
 true
+
 iex> Bloomex.member?(bf, 101)
 false
 ``````
