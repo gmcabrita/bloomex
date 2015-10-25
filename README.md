@@ -16,7 +16,7 @@ Add Bloomex as a dependency in your mix.exs file.
 
 ```elixir
 def deps do
-  [{:bloomex, "~> 0.2"}]
+  [{:bloomex, "~> 1.0"}]
 end
 ```
 
@@ -46,7 +46,7 @@ You can also pass in a hashing function to be used by the Bloom filter when crea
 (assuming we have [Murmur](https://hex.pm/packages/murmur/) installed as a dependency)
 
 ```iex
-iex> bf = Bloomex.scalable(1000, 0.1, 0.1, 2, &(Murmur.hash(:x86_128, &1)))
+iex> bf = Bloomex.scalable(1000, 0.1, 0.1, 2, &(Murmur.hash_x86_128(&1)))
 %Bloomex.ScalableBloom...
 iex> bf = Bloomex.add(bf, 5)
 %Bloomex.ScalableBloom...
