@@ -160,10 +160,11 @@ defmodule Bloomex do
     k = 1 + trunc(log2(1 / e))
     p = :math.pow(e, 1 / k)
 
-    case mode do
-      :size -> mb = 1 + trunc(-log2(1 - :math.pow(1 - p, 1 / e)))
-      :bits -> mb = capacity
-    end
+    mb =
+      case mode do
+        :size -> 1 + trunc(-log2(1 - :math.pow(1 - p, 1 / e)))
+        :bits -> capacity
+      end
 
     m = 1 <<< mb
     n = trunc(:math.log(1 - p) / :math.log(1 - 1 / m))
@@ -277,7 +278,7 @@ defmodule Bloomex do
       if head_size < n do
         %{bloom | size: size + 1, b: [hash_add(hashes, h) | t]}
       else
-        b = plain(:bits, mb + g, err * r, hash_func) |> add e
+        b = plain(:bits, mb + g, err * r, hash_func) |> add(e)
         %{bloom | size: size + 1, b: [b | bs]}
       end
     end
