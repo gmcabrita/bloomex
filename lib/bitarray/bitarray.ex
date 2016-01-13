@@ -14,7 +14,7 @@ defmodule Bloomex.BitArray do
   """
   @spec new(pos_integer) :: t
   def new(n) do
-    div(n - 1, @w) + 1 |> :array.new {:default, 0}
+    div(n - 1, @w) + 1 |> :array.new({:default, 0})
   end
 
   @doc """
