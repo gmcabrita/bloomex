@@ -14,7 +14,7 @@ defmodule Bloomex.BitArray do
   """
   @spec new(pos_integer) :: t
   def new(n) do
-    div(n - 1, @w) + 1 |> :array.new({:default, 0})
+    :array.new(div(n - 1, @w) + 1, {:default, 0})
   end
 
   @doc """
@@ -22,10 +22,10 @@ defmodule Bloomex.BitArray do
   """
   @spec set(t, non_neg_integer) :: t
   def set(a, i) do
-    ai = div i, @w
-    v = :array.get ai, a
-    v = v ||| 1 <<< (rem i, @w)
-    :array.set ai, v, a
+    ai = div(i, @w)
+    v = :array.get(ai, a)
+    v = v ||| 1 <<< rem(i, @w)
+    :array.set(ai, v, a)
   end
 
   @doc """
@@ -34,8 +34,8 @@ defmodule Bloomex.BitArray do
   """
   @spec get(t, non_neg_integer) :: boolean
   def get(a, i) do
-    ai = div i, @w
-    v = :array.get ai, a
-    (v &&& 1 <<< (rem i, @w)) !== 0
+    ai = div(i, @w)
+    v = :array.get(ai, a)
+    (v &&& 1 <<< rem(i, @w)) !== 0
   end
 end

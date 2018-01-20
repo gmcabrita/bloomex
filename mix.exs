@@ -6,7 +6,7 @@ defmodule Bloomex.Mixfile do
   """
   @github "https://github.com/gmcabrita/bloomex"
 
-  def project do
+  def project() do
     [
       app: :bloomex,
       name: "Bloomex",
@@ -14,24 +14,21 @@ defmodule Bloomex.Mixfile do
       homepage_url: nil,
       version: "1.0.1",
       elixir: "~> 1.0",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       description: @description,
       package: package(),
       deps: deps(),
-      dialyzer: [
-        flags: ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]
-      ],
       test_coverage: [tool: ExCoveralls],
       docs: docs()
     ]
   end
 
-  def application do
+  def application() do
     []
   end
 
-  defp docs do
+  defp docs() do
     [
       main: "readme",
       logo: nil,
@@ -39,17 +36,17 @@ defmodule Bloomex.Mixfile do
     ]
   end
 
-  defp deps do
+  defp deps() do
     [
-      {:excoveralls, "~> 0.5", only: :docs, runtime: false},
-      {:ex_doc, "~> 0.14", only: :docs, runtime: false},
-      {:inch_ex, ">= 0.0.0", only: :docs, runtime: false},
-      {:dialyxir, "~> 0.4", only: [:dev, :test], runtime: false},
-      {:credo, "~> 0.5", only: [:dev, :test], runtime: false}
+      {:excoveralls, "~> 0.8", only: :docs, runtime: false},
+      {:ex_doc, "~> 0.16", only: :docs, runtime: false},
+      {:inch_ex, "~> 0.5", only: :docs, runtime: false},
+      {:dialyzex, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 0.9.0-rc1", only: [:dev, :test], runtime: false}
     ]
   end
 
-  defp package do
+  defp package() do
     [
       files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Gonçalo Cabrita"],
