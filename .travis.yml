@@ -8,6 +8,7 @@ before_script:
   - mix deps.get --only test
 script:
   - mix test
+  - mix format --check-formatted
   - mix credo
 after_script:
   - mix deps.get --only docs
