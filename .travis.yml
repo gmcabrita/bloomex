@@ -14,7 +14,6 @@ after_script:
   - mix deps.get --only docs
   - MIX_ENV=docs mix coveralls.travis
 after_success:
-  - goveralls -coverprofile=coverage.out -service=travis-pro
   - wget https://raw.githubusercontent.com/k3rn31p4nic/travis-ci-discord-webhook/master/send.sh
   - chmod +x send.sh
   - ./send.sh success $WEBHOOK_URL
