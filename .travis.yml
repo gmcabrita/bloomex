@@ -9,6 +9,8 @@ before_script:
   - mix deps.get --only test
 script:
   - mix test
+  - mix xref deprecated
+  - mix xref unreachable
   - mix format --check-formatted
 after_script:
   - mix deps.get --only docs
