@@ -1,16 +1,24 @@
 language: elixir
-matrix:
-  include:
-    - otp_release: 20.2
-      elixir: 1.6.0
+elixir:
+  - '1.6'
+otp_release:
+  - '19.0'
+  - '20.0'
 sudo: false
 before_script:
   - mix deps.get --only test
 script:
   - mix test
   - mix format --check-formatted
-  - mix credo
 after_script:
   - mix deps.get --only docs
   - MIX_ENV=docs mix coveralls.travis
-  - MIX_ENV=docs mix inch.report
+after_success:
+  - goveralls -coverprofile=coverage.out -service=travis-pro
+  - wget https://raw.githubusercontent.com/k3rn31p4nic/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh success $WEBHOOK_URL
+after_failure:
+  - wget https://raw.githubusercontent.com/k3rn31p4nic/travis-ci-discord-webhook/master/send.sh
+  - chmod +x send.sh
+  - ./send.sh failure $WEBHOOK_URL
