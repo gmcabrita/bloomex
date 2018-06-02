@@ -28,6 +28,8 @@ defmodule Bloomex do
   """
 
   @type t :: Bloomex.Bloom.t() | Bloomex.ScalableBloom.t()
+  @type mode :: :bits | :size
+  @type hash_func :: (term -> pos_integer)
 
   use Bitwise
 
@@ -52,12 +54,12 @@ defmodule Bloomex do
     ]
 
     @type t :: %Bloom{
-            error_prob: float,
-            max: pos_integer,
-            mb: pos_integer,
-            size: pos_integer,
+            error_prob: number,
+            max: integer,
+            mb: integer,
+            size: integer,
             bv: [Bloomex.BitArray.t()],
-            hash_func: (term -> pos_integer)
+            hash_func: Bloomex.hash_func()
           }
   end
 
@@ -82,12 +84,12 @@ defmodule Bloomex do
     ]
 
     @type t :: %ScalableBloom{
-            error_prob: float,
-            error_prob_ratio: float,
-            growth: pos_integer,
-            size: pos_integer,
-            b: [Bloom.t()],
-            hash_func: (term -> pos_integer)
+            error_prob: number,
+            error_prob_ratio: number,
+            growth: integer,
+            size: integer,
+            b: [Bloomex.Bloom.t()],
+            hash_func: Bloomex.hash_func()
           }
   end
 
@@ -112,7 +114,7 @@ defmodule Bloomex do
   The function follows a rule of thumb due to double hashing where
   `capacity >= 4 / (error * (1 - error_ratio))` must hold true.
   """
-  @spec scalable(pos_integer, float, float, 1 | 2 | 3, (term -> pos_integer)) :: ScalableBloom.t()
+  @spec scalable(integer, number, number, 1 | 2 | 3, hash_func()) :: ScalableBloom.t()
   def scalable(
         capacity,
         error,
@@ -149,14 +151,14 @@ defmodule Bloomex do
   The function follows a rule of thumb due to double hashing where
   `capacity >= 4 / error` must hold true.
   """
-  @spec plain(pos_integer, float, (term -> pos_integer)) :: Bloom.t()
+  @spec plain(integer, float, hash_func()) :: Bloom.t()
   def plain(capacity, error, hash_func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end)
       when is_number(error) and capacity > 0 and is_float(error) and error > 0 and error < 1 and
              capacity >= 4 / error do
     plain(:size, capacity, error, hash_func)
   end
 
-  @spec plain(atom, pos_integer, float, (term -> pos_integer)) :: Bloom.t()
+  @spec plain(mode(), integer, number, hash_func()) :: Bloom.t()
   defp plain(mode, capacity, e, hash_func) do
     k = 1 + trunc(log2(1 / e))
     p = :math.pow(e, 1 / k)
@@ -225,8 +227,7 @@ defmodule Bloomex do
     Enum.any?(b, &hash_member(hashes, &1))
   end
 
-  @spec make_hashes(pos_integer, any, (term -> pos_integer)) ::
-          pos_integer | {pos_integer, pos_integer}
+  @spec make_hashes(pos_integer, any, hash_func()) :: pos_integer | {pos_integer, pos_integer}
   defp make_hashes(mb, e, hash_func) when mb <= 16 do
     hash_func.({e})
   end
@@ -300,9 +301,13 @@ defmodule Bloomex do
     end
   end
 
-  @spec set_bits(pos_integer, pos_integer, pos_integer, [Bloomex.BitArray.t()], [
-          Bloomex.BitArray.t()
-        ]) :: [Bloomex.BitArray.t()]
+  @spec set_bits(
+          pos_integer,
+          pos_integer,
+          pos_integer,
+          [Bloomex.BitArray.t()],
+          [Bloomex.BitArray.t()]
+        ) :: [Bloomex.BitArray.t()]
   defp set_bits(_, _, _, [], acc), do: Enum.reverse(acc)
 
   defp set_bits(mask, i1, i, [h | t], acc) do

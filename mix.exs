@@ -20,7 +20,16 @@ defmodule Bloomex.Mixfile do
       package: package(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      docs: docs()
+      docs: docs(),
+      dialyzer_warnings: [
+        :unmatched_returns,
+        :error_handling,
+        :race_conditions,
+        :unknown
+      ],
+      dialyzer_ignored_warnings: [
+        {:warn_contract_supertype, :_, {:extra_range, [:_, :__protocol__, 1, :_, :_]}}
+      ]
     ]
   end
 
