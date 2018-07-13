@@ -165,7 +165,7 @@ defmodule Bloomex do
 
     mb =
       case mode do
-        :size -> 1 + trunc(-log2(1 - :math.pow(1 - p, 1 / e)))
+        :size -> 1 + trunc(-log2(1 - :math.pow(1 - p, 1 / capacity)))
         :bits -> capacity
       end
 

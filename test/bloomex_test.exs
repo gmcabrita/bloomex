@@ -15,11 +15,11 @@ defmodule BloomexTest do
     bloom = Bloomex.plain(50, 0.10)
     assert Bloomex.member?(bloom, 5) == false
 
-    assert Bloomex.capacity(bloom) == 1
+    assert Bloomex.capacity(bloom) == 52
     assert Bloomex.size(bloom) == 0
 
     bloom = Bloomex.add(bloom, 2) |> Bloomex.add(3) |> Bloomex.add(2) |> Bloomex.add(10)
-    assert Bloomex.member?(bloom, 1) == true
+    assert Bloomex.member?(bloom, 10) == true
   end
 
   test "plain add" do
@@ -31,7 +31,7 @@ defmodule BloomexTest do
     bloom = Bloomex.scalable(6000, 0.001, 0.001, 3)
 
     bloom = Enum.reduce(1..10000, bloom, fn x, acc -> Bloomex.add(acc, x) end)
-    assert Bloomex.size(bloom) == 7025
+    assert Bloomex.size(bloom) == 9998
   end
 
   test "scalable force mb to be bigger than 16" do
@@ -39,6 +39,6 @@ defmodule BloomexTest do
 
     bloom = Enum.reduce(1..90000, bloom, fn x, acc -> Bloomex.add(acc, x) end)
     assert Bloomex.member?(bloom, 1) == true
-    assert Bloomex.size(bloom) == 61993
+    assert Bloomex.size(bloom) == 80253
   end
 end
