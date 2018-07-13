@@ -41,9 +41,6 @@ true
 
 iex> Bloomex.member?(bf, 105)
 false
-
-iex> Bloomex.member?(bf, 101) # false positive
-true
 ```
 
 You can also pass in a hashing function to be used by the Bloom filter when creating one.
@@ -65,10 +62,4 @@ iex> bf = Bloomex.add(bf, 100)
 
 iex> Bloomex.member?(bf, 100)
 true
-
-iex> Bloomex.member?(bf, 105) # false positive
-true
-
-iex> Bloomex.member?(bf, 101)
-false
 ``````
