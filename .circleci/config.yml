@@ -38,5 +38,3 @@ jobs:
       - run: mix xref deprecated
       - run: mix xref unreachable
       - run: mix format --check-formatted
-      - store_test_results:
-          path: _build/test/lib/bloomex
