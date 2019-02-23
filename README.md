@@ -1,8 +1,7 @@
 Bloomex
 =======
 
-[![Build Status](https://img.shields.io/travis/gmcabrita/bloomex.svg?style=flat)](https://travis-ci.org/gmcabrita/bloomex)
-[![Coverage Status](https://img.shields.io/coveralls/gmcabrita/bloomex.svg?style=flat)](https://coveralls.io/r/gmcabrita/bloomex?branch=master)
+[![Build Status](https://img.shields.io/circleci/project/github/gmcabrita/bloomex/master.svg)](https://circleci.com/gh/gmcabrita/bloomex)
 [![Hex docs](http://img.shields.io/badge/hex.pm-docs-green.svg?style=flat)](https://hexdocs.pm/bloomex)
 [![Hex Version](http://img.shields.io/hexpm/v/bloomex.svg?style=flat)](https://hex.pm/packages/bloomex)
 [![License](http://img.shields.io/hexpm/l/bloomex.svg?style=flat)](https://github.com/gmcabrita/bloomex/blob/master/LICENSE)
