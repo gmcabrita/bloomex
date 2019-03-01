@@ -4,6 +4,8 @@ jobs:
     parallelism: 1
     docker:
       - image: circleci/elixir:1.6
+        environment:
+          MIX_ENV: test
     working_directory: ~/app
     steps:
       - checkout
@@ -38,3 +40,4 @@ jobs:
       - run: mix xref deprecated
       - run: mix xref unreachable
       - run: mix format --check-formatted
+      - run: mix coveralls.circle
