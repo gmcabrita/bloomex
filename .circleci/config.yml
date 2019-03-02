@@ -3,7 +3,7 @@ jobs:
   build:
     parallelism: 1
     docker:
-      - image: circleci/elixir:1.6
+      - image: circleci/elixir:1.8
         environment:
           MIX_ENV: test
     working_directory: ~/app
@@ -20,7 +20,18 @@ jobs:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
+      - restore_cache:
+          keys:
+            - v1-dialyzer-cache-{{ .Branch }}
+            - v1-dialyzer-cache
       - run: mix do deps.get, compile
+      - run: mix format --check-formatted
+      - run: mix xref deprecated
+      - run: mix xref unreachable
+      - run: mix test
+      - run:
+          command: mix dialyzer
+          no_output_timeout: 30m
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
           paths: "deps"
@@ -36,8 +47,10 @@ jobs:
       - save_cache:
           key: v1-build-cache
           paths: "_build"
-      - run: mix test
-      - run: mix xref deprecated
-      - run: mix xref unreachable
-      - run: mix format --check-formatted
+      - save_cache:
+          key: v1-dialyzer-cache-{{ .Branch }}
+          paths: "~/.cache/dialyzer"
+      - save_cache:
+          key: v1-dialyzer-cache
+          paths: "~/.cache/dialyzer"
       - run: mix coveralls.circle
