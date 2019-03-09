@@ -25,12 +25,8 @@ jobs:
             - v1-dialyzer-cache-{{ .Branch }}
             - v1-dialyzer-cache
       - run: mix do deps.get, compile
-      - run: mix format --check-formatted
-      - run: mix xref deprecated
-      - run: mix xref unreachable
-      - run: mix test
       - run:
-          command: mix dialyzer
+          command: mix ci
           no_output_timeout: 30m
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
