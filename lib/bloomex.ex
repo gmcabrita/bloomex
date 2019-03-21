@@ -122,7 +122,7 @@ defmodule Bloomex do
         growth,
         hash_func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end
       )
-      when capacity > 0 and error > 0 and error < 1 and growth > 0 and growth < 4 and
+      when capacity > 0 and error > 0 and error < 1 and growth in [1, 2, 3] and
              error_ratio > 0 and error_ratio < 1 and capacity >= 4 / (error * (1 - error_ratio)) do
     %ScalableBloom{
       error_prob: error,
