@@ -215,6 +215,84 @@ defmodule Bloomex do
     hash_member(hashes, bloom)
   end
 
+  defimpl Jason.Encoder, for: Tuple do
+    def encode(data, options) when is_tuple(data) do
+      data
+      |> Tuple.to_list()
+      |> Jason.Encoder.List.encode(options)
+    end
+  end
+
+  @spec serialise(%{:__struct__ => atom, :b => any, optional(atom) => any}) :: binary
+  def serialise(bloom) do
+    %{b: b} = bloom
+
+    b =
+      Enum.map(b, fn bloom ->
+        bloom |> Map.from_struct() |> Map.delete(:hash_func)
+      end)
+
+    bloom |> Map.from_struct() |> Map.delete(:hash_func) |> Map.put(:b, b) |> Jason.encode!()
+  end
+
+  @spec deserialise(
+          binary
+          | maybe_improper_list(
+              binary | maybe_improper_list(any, binary | []) | byte,
+              binary | []
+            ),
+          any
+        ) :: Bloomex.ScalableBloom.t()
+  def deserialise(bloom, func) do
+    %{
+      "b" => b,
+      "error_prob" => error_prob,
+      "error_prob_ratio" => error_prob_ratio,
+      "growth" => growth,
+      "size" => size
+    } = bloom |> Jason.decode!()
+
+    b =
+      Enum.map(b, fn bloom ->
+        %{"bv" => bv} = bloom
+
+        bv =
+          Enum.map(bv, fn e ->
+            e |> get_tuple()
+          end)
+
+        %{"error_prob" => erro_prob, "max" => max, "mb" => mb, "size" => size} = bloom
+
+        %Bloomex.Bloom{
+          bv: bv,
+          error_prob: erro_prob,
+          max: max,
+          mb: mb,
+          size: size,
+          hash_func: func
+        }
+      end)
+
+    %Bloomex.ScalableBloom{
+      b: b,
+      error_prob: error_prob,
+      error_prob_ratio: error_prob_ratio,
+      growth: growth,
+      size: size,
+      hash_func: func
+    }
+  end
+
+  defp get_tuple(element) when is_list(element) do
+    element
+    |> Enum.map(&get_tuple/1)
+    |> List.to_tuple()
+  end
+
+  defp get_tuple("array"), do: :array
+
+  defp get_tuple(element), do: element
+
   @spec hash_member(pos_integer, Bloomex.t()) :: boolean
   defp hash_member(hashes, %Bloom{mb: mb, bv: bv}) do
     mask = (1 <<< mb) - 1
