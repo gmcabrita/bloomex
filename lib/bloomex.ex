@@ -243,7 +243,7 @@ defmodule Bloomex do
             ),
           any
         ) :: Bloomex.ScalableBloom.t()
-  def deserialise(bloom, func) do
+  def deserialise(bloom, func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end) do
     %{
       "b" => b,
       "error_prob" => error_prob,
