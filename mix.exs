@@ -47,7 +47,8 @@ defmodule Bloomex.Mixfile do
     [
       {:excoveralls, "~> 0.10", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.16", only: [:dev, :docs], runtime: false},
-      {:dialyzex, "~> 1.2.0", only: [:dev, :test], runtime: false}
+      {:dialyzex, "~> 1.2.0", only: [:dev, :test], runtime: false},
+      {:jason, "~> 1.1"}
     ]
   end
 
