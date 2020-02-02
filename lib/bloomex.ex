@@ -223,10 +223,9 @@ defmodule Bloomex do
     end
   end
 
-  @spec serialise(%{:__struct__ => atom, :b => any, optional(atom) => any}) :: binary
-  def serialise(bloom) do
-    %{b: b} = bloom
-
+  defdelegate serialize(bloom), to: __MODULE__, as: :serialise
+  @spec serialise(Bloomex.t()) :: binary
+  def serialise(%ScalableBloom{b: b} = bloom) do
     b =
       Enum.map(b, fn bloom ->
         bloom |> Map.from_struct() |> Map.delete(:hash_func)
@@ -235,6 +234,14 @@ defmodule Bloomex do
     bloom |> Map.from_struct() |> Map.delete(:hash_func) |> Map.put(:b, b) |> Jason.encode!()
   end
 
+  def serialise(%Bloom{} = bloom) do
+    bloom |> Map.from_struct() |> Map.delete(:hash_func) |> Jason.encode!()
+  end
+
+  defdelegate deserialize(bloom, func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end),
+    to: __MODULE__,
+    as: :deserialise
+
   @spec deserialise(
           binary
           | maybe_improper_list(
@@ -242,42 +249,44 @@ defmodule Bloomex do
               binary | []
             ),
           any
-        ) :: Bloomex.ScalableBloom.t()
+        ) :: Bloomex.t()
   def deserialise(bloom, func \\ fn x -> :erlang.phash2(x, 1 <<< 32) end) do
-    %{
-      "b" => b,
-      "error_prob" => error_prob,
-      "error_prob_ratio" => error_prob_ratio,
-      "growth" => growth,
-      "size" => size
-    } = bloom |> Jason.decode!()
+    bloom |> Jason.decode!() |> _deserialise(func)
+  end
 
-    b =
-      Enum.map(b, fn bloom ->
-        %{"bv" => bv} = bloom
-
-        bv =
-          Enum.map(bv, fn e ->
-            e |> get_tuple()
-          end)
-
-        %{"error_prob" => erro_prob, "max" => max, "mb" => mb, "size" => size} = bloom
-
-        %Bloomex.Bloom{
-          bv: bv,
-          error_prob: erro_prob,
-          max: max,
-          mb: mb,
-          size: size,
-          hash_func: func
-        }
-      end)
+  def _deserialise(
+        %{
+          "b" => b,
+          "error_prob" => error_prob,
+          "error_prob_ratio" => error_prob_ratio,
+          "growth" => growth,
+          "size" => size
+        },
+        func
+      ) do
+    b = Enum.map(b, fn bloom -> _deserialise(bloom, func) end)
 
     %Bloomex.ScalableBloom{
       b: b,
       error_prob: error_prob,
       error_prob_ratio: error_prob_ratio,
       growth: growth,
+      size: size,
+      hash_func: func
+    }
+  end
+
+  def _deserialise(
+        %{"bv" => bv, "error_prob" => error_prob, "max" => max, "mb" => mb, "size" => size},
+        func
+      ) do
+    bv = Enum.map(bv, fn e -> e |> get_tuple() end)
+
+    %Bloomex.Bloom{
+      bv: bv,
+      error_prob: error_prob,
+      max: max,
+      mb: mb,
       size: size,
       hash_func: func
     }

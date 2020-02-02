@@ -41,4 +41,28 @@ defmodule BloomexTest do
     assert Bloomex.member?(bloom, 1) == true
     assert Bloomex.size(bloom) == 80253
   end
+
+  test "scalable serialization" do
+    bloom =
+      Bloomex.scalable(1000, 0.01, 0.25, 2)
+      |> Bloomex.add(1000)
+
+    deserialized_bloom =
+      Bloomex.serialize(bloom)
+      |> Bloomex.deserialize()
+
+    assert Bloomex.member?(deserialized_bloom, 1000)
+  end
+
+  test "plain serialization" do
+    bloom =
+      Bloomex.plain(1000, 0.10)
+      |> Bloomex.add(1000)
+
+    deserialized_bloom =
+      Bloomex.serialize(bloom)
+      |> Bloomex.deserialize()
+
+    assert Bloomex.member?(deserialized_bloom, 1000)
+  end
 end
