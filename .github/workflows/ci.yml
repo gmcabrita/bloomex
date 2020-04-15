@@ -1,0 +1,36 @@
+name: CI
+env:
+  MIX_ENV: test
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-elixir@v1
+        with:
+          otp-version: 22.3
+          elixir-version: 1.10.2
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - uses: actions/cache@v1
+        with:
+          path: deps
+          key: ${{ runner.os }}-deps-${{ github.ref }}--${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-deps-
+      - uses: actions/cache@v1
+        with:
+          path: _build
+          key: ${{ runner.os }}-build-${{ github.ref }}
+          restore-keys: ${{ runner.os }}-build-
+      - uses: actions/cache@v1
+        with:
+          path: ${{ HOME/.cache/dialyzer }}
+          key: ${{ runner.os }}-dialyzer-${{ github.ref }}
+          restore-keys: ${{ runner.os }}-dialyzer-
+      - run: mix do deps.get, compile
+      - run: mix ci
+      - run: mix coveralls.github
