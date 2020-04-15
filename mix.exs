@@ -65,8 +65,6 @@ defmodule Bloomex.Mixfile do
     [
       ci: [
         "format --check-formatted",
-        "xref deprecated",
-        "xref unreachable",
         "test",
         "dialyzer"
       ]
