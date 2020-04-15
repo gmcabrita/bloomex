@@ -28,7 +28,7 @@ jobs:
           restore-keys: ${{ runner.os }}-build-
       - uses: actions/cache@v1
         with:
-          path: ${{ HOME/.cache/dialyzer }}
+          path: ~/.cache/dialyzer
           key: ${{ runner.os }}-dialyzer-${{ github.ref }}
           restore-keys: ${{ runner.os }}-dialyzer-
       - run: mix do deps.get, compile
